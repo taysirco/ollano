@@ -640,13 +640,13 @@ ul, ol {
     border-radius: var(--radius-md);
     padding: var(--space-md);
     cursor: pointer;
-    transition: all var(--transition-base);
     background: var(--color-surface);
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.25s ease, transform 0.2s ease;
 }
 
 .pricing-card:hover {
-    border-color: var(--color-primary-light);
-    box-shadow: var(--shadow-sm);
+    border-color: #C9BBE0;
+    box-shadow: 0 4px 14px rgba(91, 45, 142, 0.06);
 }
 
 .pricing-radio {
@@ -655,23 +655,47 @@ ul, ol {
     pointer-events: none;
 }
 
-.pricing-radio:checked + .pricing-card__content {
-    /* handled by parent */
+/* All non-selected variants share the same neutral surface */
+.pricing-card--popular,
+.pricing-card--best {
+    background: var(--color-surface);
+    border-color: var(--color-border);
 }
 
+/* === SELECTED STATE — applied ONLY to the checked card === */
 .pricing-card:has(.pricing-radio:checked) {
     border-color: var(--color-primary);
-    background: var(--color-surface-alt);
-    box-shadow: var(--shadow-md);
+    background: rgba(91, 45, 142, 0.04);
+    box-shadow:
+        0 0 0 4px rgba(91, 45, 142, 0.08),
+        0 10px 24px rgba(91, 45, 142, 0.12);
+    transform: translateY(-1px);
 }
 
-.pricing-card--popular {
-    border-color: var(--color-primary);
+/* Subtle confirmation check at the inline-start corner */
+.pricing-card:has(.pricing-radio:checked)::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    inset-inline-start: 10px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-primary) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L20 7'/></svg>") center/14px no-repeat;
+    box-shadow: 0 2px 6px rgba(91, 45, 142, 0.3);
+    z-index: 3;
+    animation: pricingCheckPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.pricing-card--popular:has(.pricing-radio:checked) {
-    border-color: var(--color-primary);
-    background: linear-gradient(135deg, var(--color-surface-alt), #EDE5F7);
+@keyframes pricingCheckPop {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pricing-card { transition: none; }
+    .pricing-card:has(.pricing-radio:checked) { transform: none; }
+    .pricing-card:has(.pricing-radio:checked)::after { animation: none; }
 }
 
 .popular-badge, .best-badge {
