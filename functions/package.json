@@ -1,0 +1,13 @@
+{
+  "name": "functions",
+  "description": "OLLANO leads endpoint — writes orders to Google Sheet",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "private": true,
+  "dependencies": {
+    "firebase-functions": "^5.1.1",
+    "googleapis": "^144.0.0"
+  }
+}

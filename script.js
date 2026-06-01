@@ -412,9 +412,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('quiz-modal');
         if (!modal) return;
 
-        // 🔗 رابط Google Apps Script Web App لاستقبال الليدز في الشيت
-        //    غيّره برابطك بعد نشر الـ Web App (راجع ملف LEADS_SETUP.md)
-        const LEADS_ENDPOINT = '';
+        // 🔗 مسار استقبال الليدز — Cloud Function عبر Hosting rewrite (نفس الدومين)
+        //    الكود في functions/index.js — راجع LEADS_SETUP.md
+        const LEADS_ENDPOINT = '/api/lead';
 
         const steps = modal.querySelectorAll('.quiz-step');
         const bar = document.getElementById('quiz-progress-bar');
@@ -536,24 +536,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('ollano_orders', JSON.stringify(saved));
                 } catch (_) { /* ignore */ }
 
-                const finish = () => {
+                const onSuccess = () => {
                     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origText; }
                     showStep(5);
                     if (bar) bar.style.width = '100%';
                     if (backBtn) backBtn.style.display = 'none';
                 };
+                const onError = () => {
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origText; }
+                    if (errorEl) errorEl.textContent = 'حصل خطأ في الإرسال، حاول تاني أو كلّمنا واتساب.';
+                };
 
-                if (LEADS_ENDPOINT && LEADS_ENDPOINT.indexOf('http') === 0) {
-                    // text/plain = طلب بسيط بدون CORS preflight؛ Apps Script يقرأه ويحفظه
+                if (LEADS_ENDPOINT) {
                     fetch(LEADS_ENDPOINT, {
                         method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(order)
-                    }).then(finish).catch(finish);
+                    })
+                        .then((res) => { if (!res.ok) throw new Error('status ' + res.status); return res; })
+                        .then(onSuccess)
+                        .catch(onError);
                 } else {
                     console.log('OLLANO order (لم يتم ضبط LEADS_ENDPOINT):', order);
-                    finish();
+                    onSuccess();
                 }
             });
         }

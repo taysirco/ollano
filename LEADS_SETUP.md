@@ -1,125 +1,70 @@
-# ربط طلبات OLLANO بـ Google Sheet (الدفع عند الاستلام)
+# ربط طلبات OLLANO بـ Google Sheet — عبر Cloud Function آمنة
 
-الموقع بيبعت كل طلب كـ **JSON عبر POST** لرابط **Google Apps Script Web App**، والسكربت بيكتبه في الشيت. كله من جهة المتصفح — فيشتغل على Firebase App Hosting / Hosting من غير أي سيرفر.
+الموقع يبعت كل طلب كـ **JSON** إلى `/api/lead` (نفس الدومين عبر Hosting rewrite) →
+**Cloud Function** تمسك مفتاح السيرفس أكاونت من **Secret Manager** وتكتب الصف في الشيت بالـ Sheets API.
+**المفتاح لا يلمس المتصفح إطلاقًا.**
+
+- الشيت: `1XSGO_b5GkQYqmb4rvWsWQN5eV1bT-XbXgqOJBiMosJI`
+- كود الفنكشن: [functions/index.js](functions/index.js)
 
 ---
 
-## الخطوات
+## مرة واحدة — قبل النشر
 
-### 1) اعمل Google Sheet جديد
-- افتح [sheets.new](https://sheets.new) وسمّيه مثلاً `OLLANO Orders`.
+### 1) جدّد مفتاح السيرفس أكاونت (لأن القديم اتكشف)
+Firebase Console → ⚙️ Project Settings → **Service accounts** → **Generate new private key** → نزّل ملف JSON الجديد. (الإيميل يفضل نفسه: `firebase-adminsdk-fbsvc@ollano-eg.iam.gserviceaccount.com`)
 
-### 2) افتح محرر Apps Script
-- من داخل الشيت: **Extensions → Apps Script**.
-- امسح أي كود موجود، والصق الكود ده:
-
-```javascript
-function doPost(e) {
-  var lock = LockService.getScriptLock();
-  lock.tryLock(10000);
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName('Orders') || ss.insertSheet('Orders');
-
-    // صف العناوين (مرة واحدة)
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        'التاريخ', 'الاسم', 'الهاتف', 'الواتساب', 'العنوان',
-        'النوع', 'استخدم قبل', 'يعاني تساقط',
-        'العرض', 'الكمية', 'السعر', 'الدفع', 'الصفحة'
-      ]);
-    }
-
-    var data = JSON.parse(e.postData.contents);
-
-    sheet.appendRow([
-      new Date(),
-      data.name || '',
-      data.phone || '',
-      data.whatsapp || '',
-      data.address || '',
-      data.gender || '',
-      data.usedBefore || '',
-      data.suffers || '',
-      data.offer || '',
-      data.qty || '',
-      data.price || '',
-      data.payment || '',
-      data.page || ''
-    ]);
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ result: 'ok' }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ result: 'error', message: String(err) }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } finally {
-    lock.releaseLock();
-  }
-}
+### 2) شارك الشيت مع السيرفس أكاونت
+افتح الشيت → **Share** → ضيف الإيميل ده **كـ Editor**:
+```
+firebase-adminsdk-fbsvc@ollano-eg.iam.gserviceaccount.com
 ```
 
-- احفظ (💾 أو Ctrl+S).
+### 3) جهّز تبويب الطلبات
+في الشيت، سمّي التبويب الأول **`Orders`** (الفنكشن هتضيف صف العناوين تلقائيًا أول طلب).
 
-### 3) انشر كـ Web App
-- فوق على اليمين: **Deploy → New deployment**.
-- **Select type** (الترس ⚙️) → **Web app**.
-- الإعدادات:
-  - **Description:** `OLLANO leads`
-  - **Execute as:** `Me`
-  - **Who has access:** `Anyone`  ← مهم جدًا
-- اضغط **Deploy** → وافق على الصلاحيات (Authorize) لحسابك.
-- انسخ **Web app URL** (بيكون شكله: `https://script.google.com/macros/s/AKfy.../exec`).
-
-### 4) حط الرابط في الموقع
-- افتح [script.js](script.js) ودوّر على السطر:
-  ```javascript
-  const LEADS_ENDPOINT = '';
-  ```
-- حط رابطك بين علامتي التنصيص:
-  ```javascript
-  const LEADS_ENDPOINT = 'https://script.google.com/macros/s/AKfy.../exec';
-  ```
-
-### 5) ارفع/انشر الموقع على Firebase
-- بعد ما تحط الرابط، اعمل deploy للموقع زي المعتاد.
+### 4) فعّل خطة Blaze
+Cloud Functions تحتاج خطة **Blaze** (الدفع حسب الاستخدام — مجانية عمليًا للأحجام الصغيرة).
 
 ---
 
-## تجربة سريعة
-- افتح الموقع → اضغط زر الطلب → كمّل الكويز وابعت.
-- لازم يظهر صف جديد في تبويب **Orders** في الشيت خلال ثوانٍ.
+## النشر (من تيرمنال داخل مجلد المشروع)
 
----
+```bash
+# تثبيت أدوات فايربيز (مرة واحدة)
+npm install -g firebase-tools
+firebase login
 
-## ملاحظات مهمة
-- **تعديل السكربت لاحقًا:** أي تعديل في كود Apps Script محتاج **New deployment** (أو Manage deployments → تعديل النسخة) عشان يسري المفعول.
-- **النسخة الاحتياطية:** الموقع بيخزّن نسخة من كل طلب في `localStorage` (`ollano_orders`) كأمان إضافي لو النت قطع لحظة الإرسال.
-- **CORS:** بنستخدم `mode: 'no-cors'` + `text/plain`، فالطلب بيوصل ويُحفظ بدون مشاكل CORS (الاستجابة بترجع opaque — عادي، الحفظ بيتم).
-- **(اختياري) حماية من السبام:** ممكن نضيف توكن سري:
-  - في الموقع: ضيف `token: 'سر_طويل'` لكائن `order`.
-  - في السكربت: في أول `doPost` تحقق `if (data.token !== 'سر_طويل') return ...;`
-  قوللي لو عايز ده وأظبطه.
+# تثبيت اعتماديات الفنكشن
+cd functions && npm install && cd ..
 
----
+# خزّن مفتاح السيرفس أكاونت في Secret Manager (هيطلب تلصق محتوى ملف JSON كامل)
+firebase functions:secrets:set GOOGLE_SA_KEY
+# الصق كل محتوى ملف الـ JSON ثم Enter ثم Ctrl+D
 
-## شكل البيانات اللي بتتبعت (JSON)
-```json
-{
-  "gender": "أنثى",
-  "usedBefore": "لا",
-  "suffers": "نعم، بشكل واضح",
-  "name": "سارة محمد",
-  "phone": "010xxxxxxxx",
-  "whatsapp": "010xxxxxxxx",
-  "address": "القاهرة / مدينة نصر / شارع... / بجوار...",
-  "offer": "اشترِ 2 + 2 مجاناً",
-  "qty": "4 عبوات",
-  "price": "549 ج.م",
-  "payment": "الدفع عند الاستلام",
-  "page": "https://...",
-  "createdAt": "2026-06-01T..."
-}
+# انشر الفنكشن + الموقع
+firebase deploy --only functions,hosting
 ```
+
+> **تلصق إيه في `GOOGLE_SA_KEY`؟** كل محتوى ملف الـ service account JSON الجديد (من `{` لـ `}`).
+
+---
+
+## تجربة
+افتح الموقع المنشور → زر الطلب → كمّل الكويز وابعت → لازم يظهر صف جديد في تبويب **Orders** خلال ثوانٍ.
+
+اختبار مباشر للـ endpoint:
+```bash
+curl -X POST https://ollano-eg.web.app/api/lead \
+  -H "Content-Type: application/json" \
+  -d '{"name":"تجربة","phone":"01000000000","whatsapp":"01000000000","address":"القاهرة / مدينة نصر / شارع"}'
+```
+
+---
+
+## ملاحظات
+- **أمان:** المفتاح في Secret Manager فقط؛ الموقع يكلّم `/api/lead` بنفس الدومين (مفيش CORS، ومفيش أي مفتاح في الواجهة).
+- **نسخة احتياطية:** الموقع يخزّن نسخة من كل طلب في `localStorage` (`ollano_orders`) كأمان لو الشبكة قطعت.
+- **تعديل الفنكشن لاحقًا:** أعد `firebase deploy --only functions`.
+- **تغيير الشيت:** عدّل `SHEET_ID` في [functions/index.js](functions/index.js) ثم انشر.
+- **بديل بدون مفتاح (أأمن):** بدل المفتاح، الفنكشن ممكن تستخدم السيرفس أكاونت بتاع التشغيل مباشرة (ADC) — قوللي لو عايز أحوّلها لده.
