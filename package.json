@@ -1,0 +1,17 @@
+{
+  "name": "ollano-ecommerce",
+  "version": "1.0.0",
+  "description": "OLLANO E-commerce Landing Page",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y http-server . -p 3000",
+    "deploy": "GOOGLE_APPLICATION_CREDENTIALS=\"firebase-key.json\" npx -y firebase-tools@latest deploy --only hosting"
+  },
+  "keywords": [
+    "ollano",
+    "e-commerce",
+    "landing-page"
+  ],
+  "author": "OLLANO",
+  "license": "ISC"
+}
