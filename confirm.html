@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأكيد الطلب — OLLANO</title>
+    <meta name="description" content="تم تأكيد طلبك من OLLANO بنجاح. سنتواصل معك قريباً لتأكيد التوصيل.">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/webp" href="assets/images/ollano-lotion.webp">
+
+    <style>
+        /* ============================================
+           Confirm Page — OLLANO
+           ============================================ */
+        body.confirm-page {
+            background: linear-gradient(180deg, #F5F0FA 0%, #FAFAFA 50%);
+            min-height: 100vh;
+        }
+
+        .confirm-page__header {
+            background: var(--color-surface);
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+            text-align: center;
+        }
+
+        .confirm-page__logo {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--color-primary);
+        }
+        .confirm-page__logo-text {
+            font-size: 1.75rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+        .confirm-page__logo-tagline {
+            font-size: 0.62rem;
+            letter-spacing: 2px;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+
+        .confirm-wrap {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: var(--space-xl) var(--space-md) var(--space-3xl);
+        }
+
+        /* Success hero */
+        .confirm-hero {
+            text-align: center;
+            padding: var(--space-xl) var(--space-md);
+            position: relative;
+        }
+        .confirm-hero__stars {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .confirm-hero__star {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.7;
+        }
+        .confirm-hero__star:nth-child(1) { top: 20%; right: 12%; transform: rotate(-20deg); }
+        .confirm-hero__star:nth-child(2) { top: 35%; right: 22%; font-size: 1rem; }
+        .confirm-hero__star:nth-child(3) { top: 18%; left: 14%; transform: rotate(15deg); }
+        .confirm-hero__star:nth-child(4) { top: 38%; left: 22%; font-size: 1rem; }
+
+        .confirm-hero__icon {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-md);
+            box-shadow: 0 10px 30px rgba(46, 170, 107, 0.35);
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .confirm-hero__icon svg {
+            width: 44px;
+            height: 44px;
+            stroke: #fff;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .confirm-hero__icon svg path {
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            animation: drawCheck 0.6s 0.3s ease forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .confirm-hero__title {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--color-primary-dark);
+            margin-bottom: var(--space-xs);
+            line-height: 1.3;
+        }
+        .confirm-hero__subtitle {
+            color: var(--color-text-muted);
+            font-size: 1rem;
+            margin: 0;
+            line-height: 1.7;
+        }
+        .confirm-hero__subtitle strong { color: var(--color-primary); }
+
+        /* Stepper */
+        .confirm-stepper {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: var(--space-xs);
+            margin: var(--space-xl) auto;
+            position: relative;
+            max-width: 520px;
+        }
+        .confirm-stepper::before {
+            content: '';
+            position: absolute;
+            top: 18px;
+            right: 14%;
+            left: 14%;
+            height: 2px;
+            background: var(--color-border);
+            z-index: 0;
+        }
+        .confirm-stepper::after {
+            content: '';
+            position: absolute;
+            top: 18px;
+            right: 14%;
+            width: 36%;
+            height: 2px;
+            background: var(--color-primary);
+            z-index: 1;
+        }
+        .confirm-step {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        .confirm-step__circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-xs);
+            color: var(--color-text-light);
+            font-weight: 700;
+        }
+        .confirm-step.is-done .confirm-step__circle {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #fff;
+        }
+        .confirm-step.is-current .confirm-step__circle {
+            background: var(--color-surface);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            box-shadow: 0 0 0 4px rgba(91, 45, 142, 0.12);
+        }
+        .confirm-step__label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-text);
+            line-height: 1.3;
+        }
+        .confirm-step__date {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--color-text-muted);
+            margin-top: 2px;
+        }
+
+        /* CTA primary */
+        .confirm-cta {
+            display: flex;
+            justify-content: center;
+            margin-bottom: var(--space-lg);
+        }
+        .confirm-cta__btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            padding: 14px 28px;
+            background: var(--color-primary);
+            color: #fff;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 24px rgba(91, 45, 142, 0.3);
+        }
+        .confirm-cta__btn:hover {
+            background: var(--color-primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(91, 45, 142, 0.4);
+        }
+
+        .confirm-help-line {
+            text-align: center;
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: var(--space-xl);
+            line-height: 1.7;
+        }
+        .confirm-help-line a {
+            color: var(--color-primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        /* Section heading */
+        .confirm-section-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--color-primary-dark);
+            margin: var(--space-lg) 0 var(--space-xs);
+        }
+        .confirm-orderno {
+            text-align: center;
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: var(--space-md);
+        }
+        .confirm-orderno strong {
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+
+        /* Card */
+        .confirm-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: var(--space-md);
+            box-shadow: 0 4px 18px rgba(91, 45, 142, 0.06);
+        }
+        .confirm-card__head {
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-surface-alt);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .confirm-card__head-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .confirm-card__head-title {
+            font-weight: 800;
+            color: var(--color-primary-dark);
+            font-size: 1rem;
+        }
+        .confirm-card__body {
+            padding: var(--space-md);
+        }
+
+        /* Product line item */
+        .confirm-product {
+            display: grid;
+            grid-template-columns: 88px 1fr auto;
+            gap: var(--space-md);
+            align-items: center;
+            padding: var(--space-sm) 0;
+        }
+        .confirm-product + .confirm-product {
+            border-top: 1px dashed var(--color-border);
+        }
+        .confirm-product__media {
+            width: 88px;
+            height: 88px;
+            border-radius: 12px;
+            background: var(--color-surface-alt);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+            position: relative;
+        }
+        .confirm-product__media img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .confirm-product__qty-badge {
+            position: absolute;
+            top: -8px;
+            inset-inline-end: -8px;
+            background: var(--color-primary);
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .confirm-product__info {
+            min-width: 0;
+        }
+        .confirm-product__name {
+            font-weight: 700;
+            color: var(--color-text);
+            font-size: 0.98rem;
+            margin: 0 0 4px;
+            line-height: 1.4;
+        }
+        .confirm-product__meta {
+            color: var(--color-text-muted);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+        .confirm-product__free {
+            display: inline-block;
+            background: rgba(46, 170, 107, 0.12);
+            color: var(--color-accent);
+            font-weight: 700;
+            font-size: 0.72rem;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-top: 4px;
+        }
+        .confirm-product__price {
+            font-weight: 800;
+            color: var(--color-primary-dark);
+            font-size: 1rem;
+            text-align: end;
+            white-space: nowrap;
+        }
+        .confirm-product__price s {
+            display: block;
+            color: var(--color-text-light);
+            font-weight: 500;
+            font-size: 0.78rem;
+        }
+
+        /* Totals */
+        .confirm-totals {
+            margin-top: var(--space-md);
+            padding-top: var(--space-md);
+            border-top: 1px solid var(--color-border);
+        }
+        .confirm-totals__row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            color: var(--color-text-muted);
+            font-size: 0.92rem;
+        }
+        .confirm-totals__row--total {
+            margin-top: var(--space-sm);
+            padding-top: var(--space-sm);
+            border-top: 1px dashed var(--color-border);
+            color: var(--color-primary-dark);
+            font-weight: 800;
+            font-size: 1.15rem;
+        }
+        .confirm-totals__row--free strong { color: var(--color-accent); }
+
+        /* Info grid */
+        .confirm-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+        }
+        .confirm-info__label {
+            color: var(--color-text-muted);
+            font-size: 0.78rem;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .confirm-info__value {
+            color: var(--color-text);
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        .confirm-info__value--full {
+            grid-column: 1 / -1;
+        }
+
+        /* Payment chip */
+        .confirm-payment {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(46, 170, 107, 0.1);
+            color: var(--color-accent);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        /* Trust strip */
+        .confirm-trust {
+            margin-top: var(--space-lg);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: var(--space-md);
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: var(--space-sm);
+            text-align: center;
+        }
+        .confirm-trust__item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: var(--color-text-muted);
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+        .confirm-trust__item svg {
+            width: 28px;
+            height: 28px;
+            color: var(--color-primary);
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .confirm-trust__item strong {
+            color: var(--color-text);
+            font-weight: 700;
+        }
+
+        /* Help section */
+        .confirm-help {
+            margin-top: var(--space-lg);
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            border-radius: 16px;
+            padding: var(--space-lg);
+            color: #fff;
+            text-align: center;
+        }
+        .confirm-help__title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .confirm-help__text {
+            opacity: 0.9;
+            margin-bottom: var(--space-md);
+            font-size: 0.92rem;
+        }
+        .confirm-help__buttons {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .confirm-help__btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: #fff;
+            color: var(--color-primary);
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: transform 0.2s ease;
+        }
+        .confirm-help__btn:hover { transform: translateY(-1px); }
+        .confirm-help__btn--wa {
+            background: #25D366;
+            color: #fff;
+        }
+
+        .confirm-back {
+            text-align: center;
+            margin-top: var(--space-lg);
+        }
+        .confirm-back a {
+            color: var(--color-text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .confirm-back a:hover { color: var(--color-primary); }
+
+        /* Empty state */
+        .confirm-empty {
+            text-align: center;
+            padding: var(--space-3xl) var(--space-md);
+        }
+        .confirm-empty__icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-md);
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .confirm-hero__title { font-size: 1.5rem; }
+            .confirm-hero__subtitle { font-size: 0.92rem; }
+            .confirm-stepper { max-width: 100%; }
+            .confirm-step__label { font-size: 0.78rem; }
+            .confirm-step__date { font-size: 0.68rem; }
+            .confirm-info-grid { grid-template-columns: 1fr; gap: var(--space-sm); }
+            .confirm-product {
+                grid-template-columns: 72px 1fr;
+                row-gap: 4px;
+            }
+            .confirm-product__media { width: 72px; height: 72px; }
+            .confirm-product__price { grid-column: 2; text-align: start; }
+            .confirm-trust { grid-template-columns: 1fr; }
+            .confirm-trust__item { flex-direction: row; justify-content: flex-start; text-align: start; }
+            .confirm-section-title { font-size: 1.25rem; }
+        }
+
+        /* Print */
+        @media print {
+            .confirm-page__header, .confirm-cta, .confirm-help, .confirm-back { display: none; }
+            body.confirm-page { background: #fff; }
+            .confirm-card { box-shadow: none; }
+        }
+    </style>
+</head>
+<body class="confirm-page">
+
+    <header class="confirm-page__header">
+        <a href="index.html" class="confirm-page__logo">
+            <span class="confirm-page__logo-text">OLLANO</span>
+            <span class="confirm-page__logo-tagline">THE POWER OF HERBAL INTEGRATION</span>
+        </a>
+    </header>
+
+    <main class="confirm-wrap" id="confirm-main">
+        <!-- Filled by JS -->
+    </main>
+
+    <script>
+    (function() {
+        const main = document.getElementById('confirm-main');
+        let order = null;
+        try {
+            order = JSON.parse(localStorage.getItem('ollano_last_order') || 'null');
+        } catch (_) { order = null; }
+
+        if (!order) {
+            main.innerHTML = `
+                <div class="confirm-empty">
+                    <div class="confirm-empty__icon">🛍️</div>
+                    <h1 class="confirm-hero__title">لا يوجد طلب لعرضه</h1>
+                    <p class="confirm-hero__subtitle">يبدو أنك وصلت لهذه الصفحة بدون إتمام طلب.</p>
+                    <div class="confirm-cta" style="margin-top: var(--space-lg);">
+                        <a href="index.html" class="confirm-cta__btn">العودة للصفحة الرئيسية</a>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        // --- Helpers ---
+        const num = (s) => parseInt(String(s || '').replace(/[^\d]/g, ''), 10) || 0;
+        const fmt = (n) => n.toLocaleString('ar-EG') + ' ج.م';
+
+        // Product catalogue used inside the bundle
+        const PRODUCTS = {
+            lotion:  { name: 'لوشن أولانو المضاد لتساقط الشعر', meta: 'عبوة 125 مل', img: 'assets/images/ollano-lotion.webp' },
+            serum:   { name: 'سيروم أولانو الزيتي', meta: 'عبوة 60 مل', img: 'assets/images/ollano-serum.webp' },
+            shampoo: { name: 'شامبو أولانو المضاد للتساقط', meta: 'عبوة 225 مل', img: 'assets/images/ollano-shampoo.webp' }
+        };
+
+        const OFFER_BUNDLES = {
+            '1': { label: 'لوشن أولانو المضاد لتساقط الشعر', items: ['lotion'] },
+            '2': { label: 'ثنائية العناية (لوشن + سيرم زيتي)', items: ['lotion', 'serum'] },
+            '3': { label: 'المجموعة الكاملة (لوشن + سيرم + شامبو)', items: ['lotion', 'serum', 'shampoo'] }
+        };
+        const bundle = OFFER_BUNDLES[order.offerVal] || OFFER_BUNDLES['2'];
+        const totalUnits = bundle.items.length;
+        const subtotal = num(order.price);
+        const oldTotal = num(order.old);
+        const savings = Math.max(0, oldTotal - subtotal);
+
+        const today = new Date();
+        const addDays = (d) => {
+            const x = new Date(today);
+            x.setDate(x.getDate() + d);
+            return x.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
+        };
+        const orderedDate = today.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
+        const deliveryFrom = addDays(2);
+        const deliveryTo = addDays(5);
+
+        const escapeHtml = (s) => String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+        const waNumber = '201000000000'; // ضع رقم الواتساب الفعلي للمتجر
+        const waText = encodeURIComponent('السلام عليكم، حابب أتابع طلبي رقم #' + order.orderNumber);
+
+        main.innerHTML = `
+            <section class="confirm-hero">
+                <div class="confirm-hero__stars" aria-hidden="true">
+                    <span class="confirm-hero__star">✨</span>
+                    <span class="confirm-hero__star">⭐</span>
+                    <span class="confirm-hero__star">✨</span>
+                    <span class="confirm-hero__star">⭐</span>
+                </div>
+                <div class="confirm-hero__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+                </div>
+                <h1 class="confirm-hero__title">تم تأكيد طلبك بنجاح!</h1>
+                <p class="confirm-hero__subtitle">
+                    شكراً <strong>${escapeHtml(order.name)}</strong> — سيتواصل معك فريق <strong>OLLANO</strong> خلال ساعات قليلة لتأكيد تفاصيل التوصيل.
+                </p>
+
+                <div class="confirm-stepper" role="list">
+                    <div class="confirm-step is-done" role="listitem">
+                        <div class="confirm-step__circle">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+                        </div>
+                        <span class="confirm-step__label">تم الطلب</span>
+                        <span class="confirm-step__date">${orderedDate}</span>
+                    </div>
+                    <div class="confirm-step is-current" role="listitem">
+                        <div class="confirm-step__circle">2</div>
+                        <span class="confirm-step__label">تجهيز الشحنة</span>
+                        <span class="confirm-step__date">خلال 24 ساعة</span>
+                    </div>
+                    <div class="confirm-step" role="listitem">
+                        <div class="confirm-step__circle">3</div>
+                        <span class="confirm-step__label">التوصيل</span>
+                        <span class="confirm-step__date">${deliveryFrom} - ${deliveryTo}</span>
+                    </div>
+                </div>
+
+                <div class="confirm-cta">
+                    <a href="index.html" class="confirm-cta__btn">
+                        <span>متابعة التسوق</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </a>
+                </div>
+                <p class="confirm-help-line">
+                    لو في أي استفسار، تواصل معنا واتساب <a href="https://wa.me/${waNumber}?text=${waText}">على رقم 01000000000</a>
+                </p>
+            </section>
+
+            <h2 class="confirm-section-title">تفاصيل الطلب</h2>
+            <p class="confirm-orderno">رقم الطلب: <strong>#${order.orderNumber}</strong></p>
+
+            <!-- Products -->
+            <div class="confirm-card">
+                <div class="confirm-card__head">
+                    <div class="confirm-card__head-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2l1 4h11l-1 12H7L6 6"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg>
+                    </div>
+                    <div class="confirm-card__head-title">المنتجات</div>
+                </div>
+                <div class="confirm-card__body">
+                    ${bundle.items.map((key) => {
+                        const p = PRODUCTS[key] || PRODUCTS.lotion;
+                        return `
+                    <div class="confirm-product">
+                        <div class="confirm-product__media">
+                            <img src="${p.img}" alt="${escapeHtml(p.name)}" loading="lazy">
+                        </div>
+                        <div class="confirm-product__info">
+                            <p class="confirm-product__name">${escapeHtml(p.name)}</p>
+                            <p class="confirm-product__meta">${escapeHtml(p.meta)}</p>
+                        </div>
+                        <div class="confirm-product__price">مشمول</div>
+                    </div>`;
+                    }).join('')}
+
+                    <div class="confirm-totals">
+                        <div class="confirm-totals__row">
+                            <span>عدد المنتجات</span>
+                            <span><strong>${totalUnits}</strong> ${totalUnits === 1 ? 'منتج' : 'منتجات'}</span>
+                        </div>
+                        ${oldTotal > 0 ? `
+                        <div class="confirm-totals__row">
+                            <span>إجمالي قبل الخصم</span>
+                            <span><s>${fmt(oldTotal)}</s></span>
+                        </div>` : ''}
+                        ${savings > 0 ? `
+                        <div class="confirm-totals__row confirm-totals__row--free">
+                            <span>وفرت</span>
+                            <strong>${fmt(savings)}</strong>
+                        </div>` : ''}
+                        <div class="confirm-totals__row">
+                            <span>الشحن</span>
+                            <strong style="color: var(--color-accent);">مجاني 🚚</strong>
+                        </div>
+                        <div class="confirm-totals__row confirm-totals__row--total">
+                            <span>الإجمالي عند الاستلام</span>
+                            <span>${fmt(subtotal)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping & Customer -->
+            <div class="confirm-card">
+                <div class="confirm-card__head">
+                    <div class="confirm-card__head-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </div>
+                    <div class="confirm-card__head-title">بيانات الشحن</div>
+                </div>
+                <div class="confirm-card__body">
+                    <div class="confirm-info-grid">
+                        <div>
+                            <div class="confirm-info__label">الاسم</div>
+                            <div class="confirm-info__value">${escapeHtml(order.name)}</div>
+                        </div>
+                        <div>
+                            <div class="confirm-info__label">رقم الهاتف</div>
+                            <div class="confirm-info__value" dir="ltr" style="text-align: start;">${escapeHtml(order.phone)}</div>
+                        </div>
+                        <div>
+                            <div class="confirm-info__label">رقم الواتساب</div>
+                            <div class="confirm-info__value" dir="ltr" style="text-align: start;">${escapeHtml(order.whatsapp)}</div>
+                        </div>
+                        <div>
+                            <div class="confirm-info__label">طريقة الدفع</div>
+                            <div class="confirm-info__value">
+                                <span class="confirm-payment">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v10H3z"/><circle cx="12" cy="12" r="2"/></svg>
+                                    الدفع عند الاستلام
+                                </span>
+                            </div>
+                        </div>
+                        <div class="confirm-info__value--full">
+                            <div class="confirm-info__label">عنوان التوصيل</div>
+                            <div class="confirm-info__value">${escapeHtml(order.address)}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trust strip -->
+            <div class="confirm-trust">
+                <div class="confirm-trust__item">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span><strong>شحن لكل مصر</strong><br>توصيل 2-5 أيام عمل</span>
+                </div>
+                <div class="confirm-trust__item">
+                    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span><strong>ضمان الجودة</strong><br>أو استرجاع المبلغ</span>
+                </div>
+                <div class="confirm-trust__item">
+                    <svg viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><path d="M3 11h18"/></svg>
+                    <span><strong>ادفع عند الاستلام</strong><br>افحص قبل الدفع</span>
+                </div>
+            </div>
+
+            <!-- Help -->
+            <div class="confirm-help">
+                <div class="confirm-help__title">محتاج مساعدة في طلبك؟</div>
+                <p class="confirm-help__text">فريق خدمة العملاء جاهز لمساعدتك في أي وقت — اتصل أو راسلنا واتساب.</p>
+                <div class="confirm-help__buttons">
+                    <a href="https://wa.me/${waNumber}?text=${waText}" class="confirm-help__btn confirm-help__btn--wa" target="_blank" rel="noopener">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5A11.9 11.9 0 0012 0C5.4 0 .1 5.3.1 11.9c0 2.1.5 4.1 1.6 5.9L0 24l6.4-1.7c1.7.9 3.6 1.4 5.6 1.4 6.6 0 11.9-5.3 11.9-11.9 0-3.2-1.2-6.2-3.4-8.3zM12 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.8 1 1-3.7-.2-.4a9.8 9.8 0 01-1.5-5.2c0-5.4 4.4-9.8 9.8-9.8 2.6 0 5.1 1 7 2.9 1.9 1.9 2.9 4.3 2.9 7-.1 5.3-4.5 9.8-9.8 9.8z"/></svg>
+                        تواصل واتساب
+                    </a>
+                    <a href="tel:01000000000" class="confirm-help__btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3.1-8.7A2 2 0 014 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.6a2 2 0 01-.5 2.1L7.9 9.7a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.5c.8.3 1.7.5 2.6.6a2 2 0 011.7 2z"/></svg>
+                        اتصل بنا
+                    </a>
+                </div>
+            </div>
+
+            <div class="confirm-back">
+                <a href="index.html">← العودة للصفحة الرئيسية</a>
+            </div>
+        `;
+    })();
+    </script>
+</body>
+</html>

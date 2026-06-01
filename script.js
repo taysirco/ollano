@@ -47,21 +47,33 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!thumbs.length || !heroImg) return;
 
-        thumbs.forEach(thumb => {
+        const switchToThumb = (thumb) => {
+            thumbs.forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+            heroImg.style.opacity = '0';
+            heroImg.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                heroImg.src = thumb.dataset.img;
+                heroImg.style.opacity = '1';
+                heroImg.style.transform = 'scale(1)';
+            }, 200);
+        };
+
+        let currentIndex = 0;
+        let autoSlide = setInterval(() => {
+            currentIndex = (currentIndex + 1) % thumbs.length;
+            switchToThumb(thumbs[currentIndex]);
+        }, 3000);
+
+        thumbs.forEach((thumb, i) => {
             thumb.addEventListener('click', () => {
-                // Remove active from all
-                thumbs.forEach(t => t.classList.remove('active'));
-                thumb.classList.add('active');
-                
-                // Animate image change
-                heroImg.style.opacity = '0';
-                heroImg.style.transform = 'scale(0.95)';
-                
-                setTimeout(() => {
-                    heroImg.src = thumb.dataset.img;
-                    heroImg.style.opacity = '1';
-                    heroImg.style.transform = 'scale(1)';
-                }, 200);
+                clearInterval(autoSlide);
+                currentIndex = i;
+                switchToThumb(thumb);
+                autoSlide = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % thumbs.length;
+                    switchToThumb(thumbs[currentIndex]);
+                }, 3000);
             });
         });
 
@@ -237,8 +249,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!radios.length) return;
 
         const prices = {
-            '1': '299 ج.م',
-            '2': '549 ج.م',
+            '1': '399 ج.م',
+            '2': '650 ج.م',
             '3': '799 ج.م'
         };
 
@@ -267,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     addToCartBtn.innerHTML = `
                         <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg" style="margin-left:8px;">
                             <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                        </svg>أضف إلى السلة
+                        </svg>اطلب الآن
                     `;
                     addToCartBtn.style.background = '';
                 }, 2000);
@@ -324,18 +336,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const realBtn = document.getElementById('add-to-cart');
         const barBtn = document.getElementById('mobile-buybar-btn');
         const priceEl = document.getElementById('mobile-buybar-price');
-        const prices = { '1': '299 ج.م', '2': '549 ج.م', '3': '799 ج.م' };
+        const prices = { '1': '399 ج.م', '2': '650 ج.م', '3': '799 ج.م' };
 
         document.body.classList.add('has-buybar');
 
-        // Reveal the bar once the hero has scrolled out of view
-        const onScroll = () => {
-            const heroBottom = hero ? hero.getBoundingClientRect().bottom : 0;
-            bar.classList.toggle('is-visible', heroBottom < 0);
-            bar.setAttribute('aria-hidden', heroBottom < 0 ? 'false' : 'true');
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        onScroll();
+        // Reveal the bar once the hero has scrolled out of view — use
+        // IntersectionObserver to avoid forced reflow on every scroll tick.
+        if (hero && 'IntersectionObserver' in window) {
+            const heroObs = new IntersectionObserver((entries) => {
+                const visible = !entries[0].isIntersecting;
+                bar.classList.toggle('is-visible', visible);
+                if (visible) bar.removeAttribute('inert');
+                else bar.setAttribute('inert', '');
+            }, { rootMargin: '0px 0px -100% 0px', threshold: 0 });
+            heroObs.observe(hero);
+        } else {
+            bar.classList.add('is-visible');
+            bar.removeAttribute('inert');
+        }
 
         // Keep the bar price in sync with the selected offer
         document.querySelectorAll('.pricing-radio').forEach((radio) => {
@@ -371,20 +389,43 @@ document.addEventListener('DOMContentLoaded', () => {
         // Always silent — no sound, no controls
         videos.forEach((v) => { v.muted = true; v.removeAttribute('controls'); });
 
-        // Autoplay (muted) only while the card is on screen — light & reel-like
+        // Lazy-load source the first time the card approaches the viewport
+        const ensureSource = (video) => {
+            if (video.dataset.srcLoaded === '1') return;
+            const source = video.querySelector('source[data-src]');
+            if (source && !source.src) {
+                source.src = source.dataset.src;
+                video.load();
+            }
+            video.dataset.srcLoaded = '1';
+        };
+
         if ('IntersectionObserver' in window) {
-            const io = new IntersectionObserver((entries) => {
+            // Pre-load slightly before in view to avoid black frame on first play
+            const preloadIO = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
+                        ensureSource(entry.target);
+                        preloadIO.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '300px 0px' });
+
+            // Autoplay (muted) only while the card is on screen — light & reel-like
+            const playIO = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        ensureSource(entry.target);
                         entry.target.play().catch(() => {});
                     } else {
                         entry.target.pause();
                     }
                 });
             }, { threshold: 0.5 });
-            videos.forEach((v) => io.observe(v));
+
+            videos.forEach((v) => { preloadIO.observe(v); playIO.observe(v); });
         } else {
-            videos.forEach((v) => v.play().catch(() => {}));
+            videos.forEach((v) => { ensureSource(v); v.play().catch(() => {}); });
         }
 
         // On mobile, start the carousel centered on an inner video so the
@@ -412,9 +453,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('quiz-modal');
         if (!modal) return;
 
-        // 🔗 مسار استقبال الليدز — Cloud Function عبر Hosting rewrite (نفس الدومين)
-        //    الكود في functions/index.js — راجع LEADS_SETUP.md
-        const LEADS_ENDPOINT = '/api/lead';
+        // 🔗 مسار استقبال الليدز — يتم استخدام رابط الدالة المباشر لتخطي قيود الـ CORS عند التشغيل المحلي
+        const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        const LEADS_ENDPOINT = isLocal ? 'https://us-central1-ollano-eg.cloudfunctions.net/lead' : '/api/lead';
 
         const steps = modal.querySelectorAll('.quiz-step');
         const bar = document.getElementById('quiz-progress-bar');
@@ -427,9 +468,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let step = 1;
 
         const OFFERS = {
-            '1': { name: 'اشترِ 1 + 1 مجاناً', qty: 'عبوتين', price: '299 ج.م', old: '650 ج.م' },
-            '2': { name: 'اشترِ 2 + 2 مجاناً', qty: '4 عبوات', price: '549 ج.م', old: '1,300 ج.م' },
-            '3': { name: 'اشترِ 3 + 3 مجاناً', qty: '6 عبوات', price: '799 ج.م', old: '1,950 ج.م' }
+            '1': { name: 'لوشن أولانو المضاد لتساقط الشعر', qty: 'عبوة واحدة 125مل', price: '399 ج.م', old: '550 ج.م' },
+            '2': { name: 'ثنائية العناية (لوشن + سيرم زيتي)', qty: 'لوشن 125مل + سيرم 60مل', price: '650 ج.م', old: '799 ج.م' },
+            '3': { name: 'المجموعة الكاملة (لوشن + سيرم + شامبو)', qty: 'لوشن 125مل + سيرم 60مل + شامبو 225مل', price: '799 ج.م', old: '999 ج.م' }
         };
 
         const getOffer = () => {
@@ -497,13 +538,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // submit order
         if (form) {
+            const phoneInput = form.querySelector('input[name="phone"]');
+            const whatsappInput = form.querySelector('input[name="whatsapp"]');
+
+            const convertArabicDigits = (str) => {
+                if (typeof str !== 'string') return str;
+                // Arabic-Indic (Hindi) digits: ٠١٢٣٤٥٦٧٨٩
+                const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                // Persian/Urdu digits: ۰۱۲۳۴۵۶۷۸۹
+                const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                
+                return str
+                    .replace(/[٠-٩]/g, (w) => arabicDigits.indexOf(w))
+                    .replace(/[۰-۹]/g, (w) => persianDigits.indexOf(w));
+            };
+
+            const handleDigitConversion = (e) => {
+                const input = e.target;
+                const start = input.selectionStart;
+                const end = input.selectionEnd;
+                const originalValue = input.value;
+                const convertedValue = convertArabicDigits(originalValue);
+
+                if (originalValue !== convertedValue) {
+                    input.value = convertedValue;
+                    // Restore selection/cursor position
+                    input.setSelectionRange(start, end);
+                }
+            };
+
+            if (phoneInput) {
+                ['input', 'keyup', 'change', 'paste'].forEach(event => {
+                    phoneInput.addEventListener(event, handleDigitConversion);
+                });
+            }
+            if (whatsappInput) {
+                ['input', 'keyup', 'change', 'paste'].forEach(event => {
+                    whatsappInput.addEventListener(event, handleDigitConversion);
+                });
+            }
+
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const data = new FormData(form);
                 const name = (data.get('name') || '').toString().trim();
-                const phone = (data.get('phone') || '').toString().trim();
-                const whatsapp = (data.get('whatsapp') || '').toString().trim();
+                const phone = convertArabicDigits((data.get('phone') || '').toString().trim());
+                const whatsapp = convertArabicDigits((data.get('whatsapp') || '').toString().trim());
                 const address = (data.get('address') || '').toString().trim();
+
+                // Update input values in DOM
+                if (phoneInput) phoneInput.value = phone;
+                if (whatsappInput) whatsappInput.value = whatsapp;
+
                 const phoneOk = /^01[0-9]{9}$/.test(phone);
                 const waOk = /^01[0-9]{9}$/.test(whatsapp);
 
@@ -516,9 +602,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (err) return;
 
                 const o = getOffer();
+                const orderNumber = String(Math.floor(1000000 + Math.random() * 9000000));
                 const order = Object.assign({}, answers, {
+                    orderNumber: orderNumber,
                     name: name, phone: phone, whatsapp: whatsapp, address: address,
-                    offer: o.name, qty: o.qty, price: o.price,
+                    offer: o.name, offerVal: o.val, qty: o.qty, price: o.price, old: o.old,
                     payment: 'الدفع عند الاستلام',
                     page: location.href,
                     createdAt: new Date().toISOString()
@@ -538,9 +626,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const onSuccess = () => {
                     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origText; }
-                    showStep(5);
-                    if (bar) bar.style.width = '100%';
-                    if (backBtn) backBtn.style.display = 'none';
+                    try { localStorage.setItem('ollano_last_order', JSON.stringify(order)); } catch (_) {}
+                    window.location.href = 'confirm.html';
                 };
                 const onError = () => {
                     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origText; }
@@ -553,9 +640,27 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(order)
                     })
-                        .then((res) => { if (!res.ok) throw new Error('status ' + res.status); return res; })
+                        .then((res) => {
+                            if (!res.ok) {
+                                const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+                                if (isLocal) {
+                                    console.warn('Local Dev Warning: API returned ' + res.status + '. Simulating success on localhost.');
+                                    return { json: () => Promise.resolve({ result: 'ok' }) };
+                                }
+                                throw new Error('status ' + res.status);
+                            }
+                            return res;
+                        })
                         .then(onSuccess)
-                        .catch(onError);
+                        .catch((err) => {
+                            const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+                            if (isLocal) {
+                                console.warn('Local Dev Warning: API connection failed. Simulating success on localhost. Error: ' + err.message);
+                                onSuccess();
+                            } else {
+                                onError();
+                            }
+                        });
                 } else {
                     console.log('OLLANO order (لم يتم ضبط LEADS_ENDPOINT):', order);
                     onSuccess();
