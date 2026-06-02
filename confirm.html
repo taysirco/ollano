@@ -662,6 +662,7 @@
         const waText = encodeURIComponent('السلام عليكم، حابب أتابع طلبي رقم #' + order.orderNumber);
 
         // --- TikTok Lead event (fires once per order to avoid duplicates) ---
+        // Uses the same event_id as the server-side Events API call → TikTok dedup.
         try {
             const firedKey = 'ollano_lead_fired_' + order.orderNumber;
             if (window.ttq && !localStorage.getItem(firedKey)) {
@@ -672,6 +673,8 @@
                     quantity: totalUnits,
                     value: subtotal,
                     currency: 'EGP'
+                }, {
+                    event_id: order.eventId || order.orderNumber
                 });
                 localStorage.setItem(firedKey, '1');
             }

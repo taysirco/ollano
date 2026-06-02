@@ -2,6 +2,43 @@
    OLLANO Landing Page - Interactive Scripts
    ============================================ */
 
+// ============================================
+// TikTok tracking helpers (Pixel + Events API dedup)
+// ============================================
+(function captureTikTokClickId() {
+    try {
+        const u = new URL(location.href);
+        const c = u.searchParams.get('ttclid');
+        if (c) {
+            // store for 30 days
+            const exp = Date.now() + 30 * 24 * 60 * 60 * 1000;
+            localStorage.setItem('ollano_ttclid', JSON.stringify({ v: c, exp }));
+        }
+    } catch (_) { /* ignore */ }
+})();
+
+function getTikTokIds() {
+    let ttclid = '';
+    try {
+        const raw = localStorage.getItem('ollano_ttclid');
+        if (raw) {
+            const obj = JSON.parse(raw);
+            if (obj && obj.v && obj.exp && obj.exp > Date.now()) ttclid = obj.v;
+            else localStorage.removeItem('ollano_ttclid');
+        }
+    } catch (_) { /* ignore */ }
+    let ttp = '';
+    try {
+        const m = document.cookie.match(/(?:^|; )_ttp=([^;]+)/);
+        if (m) ttp = decodeURIComponent(m[1]);
+    } catch (_) { /* ignore */ }
+    return { ttclid, ttp };
+}
+
+function genEventId() {
+    return 'evt_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // ============================================
     // 1. Countdown Timer
@@ -603,12 +640,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const o = getOffer();
                 const orderNumber = String(Math.floor(1000000 + Math.random() * 9000000));
+                const tk = getTikTokIds();
+                const eventId = genEventId();
                 const order = Object.assign({}, answers, {
                     orderNumber: orderNumber,
                     name: name, phone: phone, whatsapp: whatsapp, address: address,
                     offer: o.name, offerVal: o.val, qty: o.qty, price: o.price, old: o.old,
                     payment: 'الدفع عند الاستلام',
                     page: location.href,
+                    referrer: document.referrer || '',
+                    userAgent: navigator.userAgent || '',
+                    eventId: eventId,
+                    ttclid: tk.ttclid || '',
+                    ttp: tk.ttp || '',
                     createdAt: new Date().toISOString()
                 });
 
